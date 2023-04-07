@@ -1,0 +1,31 @@
+BALLOT = HEADER, SECTION+
+HEADER = "Election: ", TITLE, "\n", DATE, "\n", INSTRUCTIONS
+TITLE = string
+DATE = year "-" month "-" day
+YEAR = digit(4)
+MONTH = digit(2)
+DAY = digit(2)
+
+SECTION = "Section: ", SECTION_NAME, ITEM+
+SECTION_NAME = string
+ITEM = CONTEST | PROPOSITION | RANKED_CHOICE | APPROVAL
+
+CONTEST = "Contest: ", CONTEST_NAME, CANDIDATE+, (WRITE_IN)?
+CONTEST_NAME = string
+WRITE_IN = bool
+
+PROPOSITION = "Proposition: ", PROP_NAME, PROP_DESCRIPTION, OPTION+
+PROP_NAME = string
+PROP_DESCRIPTION = string
+
+RANKED_CHOICE = "Ranked Choice: ", RANKED_CHOICE_NAME, OPTION+ | CANDIDATE+
+RANKED_CHOICE_NAME = string
+
+APPROVAL = "Approval: ", APPROVAL_NAME, OPTION+ | CANADATE+
+APPROVAL_NAME = string
+
+CANDIDATE = "Candidate: ", NAME, PARTY
+NAME = string
+PARTY = string
+
+OPTION = "Option: ", string
