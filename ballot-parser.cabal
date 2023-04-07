@@ -14,7 +14,7 @@ version:            0.1.0.0
 -- The license under which the package is released.
 -- license:
 author:             Brian McCollum
-maintainer:         bmccollum00@gmail.com
+maintainer:         brianmccollum@unm.edu
 
 -- A copyright notice.
 -- copyright:
@@ -29,8 +29,8 @@ executable ballot-parser
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends:    base ^>=4.14.3.0
-                    , parsec
+    build-depends:    base ^>=4.16.4.0
+                    , parsec ^>=3.1.16.1
     hs-source-dirs:   app
     other-modules:    BallotParser
     default-language: Haskell2010

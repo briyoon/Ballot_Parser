@@ -1,4 +1,4 @@
-BALLOT = HEADER, SECTION+
+BALLOT = HEADER, "\n", SECTION+
 HEADER = "Election: ", TITLE, "\n", DATE, "\n", INSTRUCTIONS
 TITLE = string
 DATE = year "-" month "-" day
@@ -8,11 +8,11 @@ DAY = digit(2)
 
 SECTION = "Section: ", SECTION_NAME, ITEM+
 SECTION_NAME = string
-ITEM = CONTEST | PROPOSITION | RANKED_CHOICE | APPROVAL
+ITEM = "\n", (CONTEST | PROPOSITION | RANKED_CHOICE | APPROVAL)
 
 CONTEST = "Contest: ", CONTEST_NAME, CANDIDATE+, (WRITE_IN)?
 CONTEST_NAME = string
-WRITE_IN = bool
+WRITE_IN = "Write-in: ", ("true" | "false"), "\n"
 
 PROPOSITION = "Proposition: ", PROP_NAME, PROP_DESCRIPTION, OPTION+
 PROP_NAME = string
@@ -21,11 +21,11 @@ PROP_DESCRIPTION = string
 RANKED_CHOICE = "Ranked Choice: ", RANKED_CHOICE_NAME, OPTION+ | CANDIDATE+
 RANKED_CHOICE_NAME = string
 
-APPROVAL = "Approval: ", APPROVAL_NAME, OPTION+ | CANADATE+
+APPROVAL = "\nApproval: ", APPROVAL_NAME, OPTION+ | CANDIDATE+
 APPROVAL_NAME = string
 
-CANDIDATE = "Candidate: ", NAME, PARTY
+CANDIDATE = "Candidate: ", NAME, PARTY, "\n"
 NAME = string
 PARTY = string
 
-OPTION = "Option: ", string
+OPTION = "Option: ", string, "\n"
