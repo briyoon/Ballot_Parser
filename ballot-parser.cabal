@@ -29,7 +29,7 @@ executable ballot-parser
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends:    base ^>=4.16.4.0
+    build-depends:    base ^>=4.16.0.0
                     , parsec ^>=3.1.16.1
                     , aeson ^>=2.1.2.1
                     , bytestring
