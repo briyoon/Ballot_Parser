@@ -1,38 +1,67 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module BallotParser where
 
 import Text.Parsec
 import Text.Parsec.String
 import Data.Char (digitToInt)
+import GHC.Generics (Generic)
+import Data.Aeson ( FromJSON, ToJSON, encode )
+import qualified Data.ByteString.Lazy.Char8 as BL
 
 -- Data structures
 data Ballot = Ballot { header :: Header, sections :: [Section] }
-            deriving (Show, Eq)
+            deriving (Show, Eq, Generic)
 data Header = Header { title :: String, date :: String, instructions :: String }
-            deriving (Show, Eq)
+            deriving (Show, Eq, Generic)
 data Section = Section { sectionName :: String, items :: [Item] }
-            deriving (Show, Eq)
+            deriving (Show, Eq, Generic)
 data Item = Contest ContestData
           | Proposition PropositionData
           | RankedChoice RankedChoiceData
           | Approval ApprovalData
-          deriving (Show, Eq)
+          deriving (Show, Eq, Generic)
 data ContestData = ContestData { contestName :: String, candidates :: [Candidate], writeIn :: Bool }
-                deriving (Show, Eq)
+                deriving (Show, Eq, Generic)
 data PropositionData = PropositionData { propName :: String, propDescription :: String, options :: [Option] }
-                deriving (Show, Eq)
+                deriving (Show, Eq, Generic)
 data RankedChoiceData = RankedChoiceData { rankedChoiceName :: String, rankedChoices :: [RankedChoiceOption] }
-                      deriving (Show, Eq)
+                      deriving (Show, Eq, Generic)
 data ApprovalData = ApprovalData { approvalName :: String, approvals :: [RankedChoiceOption] }
-                deriving (Show, Eq)
+                deriving (Show, Eq, Generic)
 data Candidate = Candidate { name :: String, party :: String }
-                deriving (Show, Eq)
+                deriving (Show, Eq, Generic)
 data RankedChoiceOption = RankedChoiceOption Option
                         | RankedChoiceCandidate Candidate
-                        deriving (Show, Eq)
+                        deriving (Show, Eq, Generic)
 data ApprovalOption = ApprovalOption Option
                     | ApprovalCandidate Candidate
-                    deriving (Show, Eq)
+                    deriving (Show, Eq, Generic)
 type Option = String
+
+-- Instances for JSON encoding
+instance ToJSON Ballot
+instance FromJSON Ballot
+instance ToJSON Header
+instance FromJSON Header
+instance ToJSON Section
+instance FromJSON Section
+instance ToJSON Item
+instance FromJSON Item
+instance ToJSON ContestData
+instance FromJSON ContestData
+instance ToJSON PropositionData
+instance FromJSON PropositionData
+instance ToJSON RankedChoiceData
+instance FromJSON RankedChoiceData
+instance ToJSON ApprovalData
+instance FromJSON ApprovalData
+instance ToJSON Candidate
+instance FromJSON Candidate
+instance ToJSON RankedChoiceOption
+instance FromJSON RankedChoiceOption
+instance ToJSON ApprovalOption
+instance FromJSON ApprovalOption
 
 -- Parsers
 ballotParser :: Parser Ballot
@@ -130,3 +159,6 @@ optionParser = do
 -- Function to parse a ballot
 parseBallot :: String -> Either ParseError Ballot
 parseBallot input = parse ballotParser "" input
+
+ballotToJson :: Ballot -> String
+ballotToJson ballot = BL.unpack $ encode ballot
