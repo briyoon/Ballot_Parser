@@ -6,7 +6,7 @@ import Text.Parsec
 import Text.Parsec.String
 import Data.Char (digitToInt)
 import GHC.Generics (Generic)
-import Data.Aeson ( FromJSON, ToJSON, encode )
+import Data.Aeson (FromJSON, ToJSON, encode)
 import qualified Data.ByteString.Lazy.Char8 as BL
 
 -- Data structures
