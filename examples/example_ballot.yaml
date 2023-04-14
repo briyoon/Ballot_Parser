@@ -1,28 +1,53 @@
-Election: General Election 2023
-2023-11-08
-Instructions: To cast your vote, select your choice and confirm your selection.
-Section: National
-Contest: President
-Candidate: John Smith, Democrat
-Candidate: Jane Doe, Republican
-Write-in: true
-Proposition: Prop 1 - Infrastructure Investment
-Prop 1 aims to increase funding for infrastructure projects, including roads, bridges, and public transportation.
-Option: Yes
-Option: No
-Ranked Choice: Best Ice Cream Flavor
-Candidate: Choco, Chocolate
-Candidate: Vanilla, Ice
-Candidate: Strawberry, Shortcake
-Approval: Select preferred board members
-Candidate: Alice Johnson, Independent
-Candidate: Bob Martinez, Independent
-Candidate: Charles Lee, Independent
-Section: State
-Contest: Governor
-Candidate: Laura Brown, Democrat
-Candidate: Steven Johnson, Republican
-Proposition: Prop 2 - Educational Funding
-Prop 2 proposes an increase in educational funding for public schools, aiming to reduce class sizes and provide more resources for students.
-Option: Yes
-Option: No
+Ballot:
+  Header: "General Election 2023"
+    Date: 2023-11-08
+    Instructions: "To cast your vote, select your choice and confirm your selection."
+  Section: "National"
+    Contest: "President"
+      Vote-for: 1
+      Candidate:
+        Name: "John Smith"
+        Party: "Democrat"
+      Candidate:
+        Name: "Jane Doe"
+        Party: "Republican"
+      Write-in: true
+    Proposition: "Prop 1 - Infrastructure Investment"
+      Description: "Prop 1 aims to increase funding for infrastructure projects, including roads, bridges, and public transportation."
+      Option: "Yes"
+      Option: "No"
+    Ranked Choice: "Best Flavor Mascot"
+      Vote-for: 1
+      Candidate:
+        Name: "Count Chocula"
+        Party: "Chocolate"
+      Candidate:
+        Name: "Vanilla Ice"
+        Party: "Vanilla"
+      Candidate:
+        Name: "Strawberry Shortcake"
+        Party: "Strawberry"
+      Write-in: false
+    Approval: "Select preferred board members"
+      Candidate:
+        Name: "Alice Johnson"
+        Party: "Independent"
+      Candidate:
+        Name: "Bob Martinez"
+        Party: "Independent"
+      Candidate:
+        Name: "Charles Lee"
+        Party: "Independent"
+  Section: "State"
+    Contest: "Governor"
+      Vote-for: 1
+      Candidate:
+        Name: "Laura Brown"
+        Party: "Democrat"
+      Candidate:
+        Name: "Steven Johnson"
+        Party: "Republican"
+    Proposition: "Prop 2 - Educational Funding"
+      Description: "Prop 2 proposes an increase in educational funding for public schools, aiming to reduce class sizes and provide more resources for students."
+      Option: "Yes"
+      Option: "No"

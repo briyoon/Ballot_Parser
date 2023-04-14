@@ -1,31 +1,31 @@
-BALLOT = HEADER, "\n", SECTION+
-HEADER = "Election: ", TITLE, "\n", DATE, "\n", INSTRUCTIONS
-TITLE = string
-DATE = year "-" month "-" day
-YEAR = digit(4)
-MONTH = digit(2)
-DAY = digit(2)
-
-SECTION = "Section: ", SECTION_NAME, ITEM+
-SECTION_NAME = string
-ITEM = "\n", (CONTEST | PROPOSITION | RANKED_CHOICE | APPROVAL)
-
-CONTEST = "Contest: ", CONTEST_NAME, CANDIDATE+, (WRITE_IN)?
-CONTEST_NAME = string
-WRITE_IN = "Write-in: ", ("true" | "false"), "\n"
-
-PROPOSITION = "Proposition: ", PROP_NAME, PROP_DESCRIPTION, OPTION+
-PROP_NAME = string
-PROP_DESCRIPTION = string
-
-RANKED_CHOICE = "Ranked Choice: ", RANKED_CHOICE_NAME, OPTION+ | CANDIDATE+
-RANKED_CHOICE_NAME = string
-
-APPROVAL = "\nApproval: ", APPROVAL_NAME, OPTION+ | CANDIDATE+
-APPROVAL_NAME = string
-
-CANDIDATE = "Candidate: ", NAME, PARTY, "\n"
-NAME = string
-PARTY = string
-
-OPTION = "Option: ", string, "\n"
+ballot           = header, section+
+header           = "Header:", title, date, instructions
+date             = "Date:", year, "-", month, "-", day
+instructions     = "Instructions:", quotedString
+section          = "Section:", section_name :: quotedString, contest+
+contest          = (contest | proposition | ranked_choice | approval)
+contest          = "Contest: ", vote_for, candidate+, write_in
+proposition      = "Proposition:", prop_name, prop_description, option+
+ranked_choice    = "Ranked Choice:", contest_name, vote_for, candidate+, write_in
+approval         = "Approval:", approval_name, option+ | candidate+
+vote_for         = "Vote-for:", integer
+candidate        = "Candidate:", name_entry, party_entry
+write_in         = "Write-in:", boolean
+prop_name        = quotedString
+prop_description = "Description:", quotedString
+option           = "Option:", option_choice
+contest_name     = quotedString
+name_entry       = "Name:", quotedString
+party_entry      = "Party:", quotedString
+option_choice    = quotedString
+year             = digit{4}
+month            = digit{2}
+day              = digit{2}
+integer          = digit+
+boolean          = "true" | "false"
+quotedString     = quote, {alpha | digit | space | punctuation}+, quote
+alpha            = "A".."Z" | "a".."z"
+digit            = "0".."9"
+space            = " "
+quote            = "\""
+punctuation      = "," | "-" | "." | "!" | "?" | "'" | "&" | ":" | ";" | "/" | "(" | ")" | "{" | "}" | "[" | "]"

@@ -1,43 +1,76 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module BallotParser where
 
 import Text.Parsec
 import Text.Parsec.String
+import Text.ParserCombinators.Parsec.Number
 import Data.Char (digitToInt)
 import GHC.Generics (Generic)
-import Data.Aeson (FromJSON, ToJSON, encode)
+import Data.Aeson (FromJSON, ToJSON, encode, toJSON, object, KeyValue ((.=)), Value, pairs)
 import qualified Data.ByteString.Lazy.Char8 as BL
+import Data.Aeson.Types (toEncoding)
 
 -- Data structures
-data Ballot = Ballot { header :: Header, sections :: [Section] }
-            deriving (Show, Eq, Generic)
-data Header = Header { title :: String, date :: String, instructions :: String }
-            deriving (Show, Eq, Generic)
-data Section = Section { sectionName :: String, items :: [Item] }
-            deriving (Show, Eq, Generic)
+data Ballot = Ballot {
+    header :: Header,
+    sections :: [Section]
+} deriving (Show, Eq, Generic)
+
+data Header = Header {
+    title :: String,
+    date :: String,
+    instructions :: String
+} deriving (Show, Eq, Generic)
+
+data Section = Section {
+    sectionName :: String,
+    items :: [Item]
+} deriving (Show, Eq, Generic)
+
 data Item = Contest ContestData
           | Proposition PropositionData
           | RankedChoice RankedChoiceData
           | Approval ApprovalData
-          deriving (Show, Eq, Generic)
-data ContestData = ContestData { contestName :: String, candidates :: [Candidate], writeIn :: Bool }
-                deriving (Show, Eq, Generic)
-data PropositionData = PropositionData { propName :: String, propDescription :: String, options :: [Option] }
-                deriving (Show, Eq, Generic)
-data RankedChoiceData = RankedChoiceData { rankedChoiceName :: String, rankedChoices :: [RankedChoiceOption] }
-                      deriving (Show, Eq, Generic)
-data ApprovalData = ApprovalData { approvalName :: String, approvals :: [RankedChoiceOption] }
-                deriving (Show, Eq, Generic)
-data Candidate = Candidate { name :: String, party :: String }
-                deriving (Show, Eq, Generic)
-data RankedChoiceOption = RankedChoiceOption Option
-                        | RankedChoiceCandidate Candidate
-                        deriving (Show, Eq, Generic)
-data ApprovalOption = ApprovalOption Option
-                    | ApprovalCandidate Candidate
-                    deriving (Show, Eq, Generic)
-type Option = String
+    deriving (Show, Eq, Generic)
+
+data ContestData = ContestData {
+    contestName :: String,
+    contestVoteFor :: Int,
+    contestChoices :: [Candidate],
+    contestWriteIn :: Bool
+} deriving (Show, Eq, Generic)
+
+data PropositionData = PropositionData {
+    propName :: String,
+    propDescription :: String,
+    propChoices :: [Option]
+} deriving (Show, Eq, Generic)
+
+data RankedChoiceData = RankedChoiceData {
+    rankedChoiceName :: String,
+    rankedChoiceVoteFor :: Int,
+    rankedChoices :: [Candidate],
+    rankedChoiceWriteIn :: Bool
+} deriving (Show, Eq, Generic)
+
+data ApprovalData = ApprovalData {
+    approvalName :: String,
+    approvalChoices :: [Choice]
+} deriving (Show, Eq, Generic)
+
+data Choice = CandidateChoice Candidate
+            | OptionChoice Option
+    deriving (Show, Eq, Generic)
+
+data Candidate = Candidate {
+    name :: String,
+    party :: String
+} deriving (Show, Eq, Generic)
+
+newtype Option = Option String
+    deriving (Show, Eq, Generic)
 
 -- Instances for JSON encoding
 instance ToJSON Ballot
@@ -46,7 +79,11 @@ instance ToJSON Header
 instance FromJSON Header
 instance ToJSON Section
 instance FromJSON Section
-instance ToJSON Item
+instance ToJSON Item where
+    toJSON (Contest contest) = object ["contest" .= contest]
+    toJSON (Proposition proposition) = object ["proposition" .= proposition]
+    toJSON (RankedChoice rankedChoice) = object ["rankedChoice" .= rankedChoice]
+    toJSON (Approval approval) = object ["approval" .= approval]
 instance FromJSON Item
 instance ToJSON ContestData
 instance FromJSON ContestData
@@ -56,109 +93,130 @@ instance ToJSON RankedChoiceData
 instance FromJSON RankedChoiceData
 instance ToJSON ApprovalData
 instance FromJSON ApprovalData
-instance ToJSON Candidate
+instance ToJSON Choice where
+    -- toJSON (CandidateChoice candidate) = object ["candidate" .= candidate]
+    toJSON (CandidateChoice candidate) = object ["candidate" .= object ["name" .= name candidate, "party" .= party candidate]]
+    toJSON (OptionChoice option) = object ["option" .= option]
+instance FromJSON Choice
+instance ToJSON Candidate where
+    toJSON (Candidate name party) = object ["candidate" .= object ["name" .= name, "party" .= party]]
+    -- toJSON (Candidate name party) = object ["name" .= name, "party" .= party]
 instance FromJSON Candidate
-instance ToJSON RankedChoiceOption
-instance FromJSON RankedChoiceOption
-instance ToJSON ApprovalOption
-instance FromJSON ApprovalOption
+instance ToJSON Option where
+    toJSON (Option option) = object ["option" .= option]
+instance FromJSON Option
 
 -- Parsers
 ballotParser :: Parser Ballot
 ballotParser = do
-    header <- headerParser
-    many newline
-    sections <- many1 sectionParser
+    lexeme $ string "Ballot:"
+    header <- lexeme headerParser
+    sections <- many1 $ lexeme sectionParser
     return $ Ballot header sections
 
 headerParser :: Parser Header
 headerParser = do
-    many newline
-    string "Election: "
-    title <- manyTill anyChar newline
-    year <- count 4 digit
-    char '-'
-    month <- count 2 digit
-    char '-'
-    day <- count 2 digit
-    skipMany1 newline
-    instructions <- manyTill anyChar newline
-    return $ Header title (year ++ "-" ++ month ++ "-" ++ day) instructions
+    lexeme $ string "Header:"
+    title <- lexeme quotedString
+    lexeme $ string "Date:"
+    date <- lexeme dateParser
+    lexeme $ string "Instructions:"
+    instructions <- lexeme quotedString
+    return $ Header title date instructions
 
 sectionParser :: Parser Section
 sectionParser = do
-    many newline
-    string "Section: "
-    sectionName <- manyTill anyChar newline
-    items <- many1 itemParser
-    skipMany newline
+    lexeme $ string "Section:"
+    sectionName <- lexeme quotedString
+    items <- many1 $ lexeme itemParser
     return $ Section sectionName items
 
 itemParser :: Parser Item
 itemParser = try contestParser
           <|> try propositionParser
           <|> try rankedChoiceParser
-          <|> try approvalParser
+          <|> approvalParser
 
 contestParser :: Parser Item
 contestParser = do
-    many newline
-    string "Contest: "
-    contestName <- manyTill anyChar (try newline)
-    candidates <- many1 candidateParser
-    writeIn <- option False (try writeInParser)
-    return $ Contest (ContestData contestName candidates writeIn)
+    lexeme $ string "Contest:"
+    contestName <- lexeme quotedString
+    voteFor <- lexeme voteForParser
+    candidates <- many1 $ lexeme $ try candidateParser
+    writeIn <- option False $ lexeme $ try writeInParser
+    return $ Contest $ ContestData contestName voteFor candidates writeIn
 
 candidateParser :: Parser Candidate
 candidateParser = do
-    many newline
-    string "Candidate: "
-    name <- manyTill anyChar (try (string ", "))
-    party <- manyTill anyChar newline
+    lexeme $ string "Candidate:"
+    lexeme $ string "Name:"
+    name <- lexeme quotedString
+    lexeme $ string "Party:"
+    party <- lexeme quotedString
     return $ Candidate name party
-
-writeInParser :: Parser Bool
-writeInParser = do
-    many newline
-    string "Write-in: "
-    writeIn <- choice [string "true", string "false"]
-    newline
-    return $ writeIn == "true"
 
 propositionParser :: Parser Item
 propositionParser = do
-    many newline
-    string "Proposition: "
-    propName <- manyTill anyChar newline
-    propDescription <- manyTill anyChar newline
-    options <- many1 optionParser
-    return $ Proposition (PropositionData propName propDescription options)
+    lexeme $ string "Proposition:"
+    propName <- lexeme quotedString
+    lexeme $ string "Description:"
+    propDescription <- lexeme quotedString
+    options <- many1 $ lexeme $ try optionParser
+    return $ Proposition $ PropositionData propName propDescription options
 
 rankedChoiceParser :: Parser Item
 rankedChoiceParser = do
-    many newline
-    string "Ranked Choice: "
-    rankedChoiceName <- manyTill anyChar newline
-    rankedChoices <- many1 (try (RankedChoiceOption <$> optionParser) <|> (RankedChoiceCandidate <$> candidateParser))
-    return $ RankedChoice (RankedChoiceData rankedChoiceName rankedChoices)
+    lexeme $ string "Ranked Choice:"
+    rankedChoiceName <- lexeme quotedString
+    voteFor <- lexeme voteForParser
+    rankedChoices <- many1 $ lexeme $ try candidateParser
+    writeIn <- option False $ lexeme $ try writeInParser
+    return $ RankedChoice $ RankedChoiceData rankedChoiceName voteFor rankedChoices writeIn
 
 approvalParser :: Parser Item
 approvalParser = do
-    many newline
-    string "Approval: "
-    approvalName <- manyTill anyChar newline
-    approvals <- many1 (try (RankedChoiceOption <$> optionParser) <|> (RankedChoiceCandidate <$> candidateParser))
-    return $ Approval (ApprovalData approvalName approvals)
+    lexeme $ string "Approval:"
+    approvalName <- lexeme quotedString
+    approvalChoices <- many1 $ lexeme $ try ((CandidateChoice <$> candidateParser) <|> (OptionChoice <$> optionParser))
+    return $ Approval (ApprovalData approvalName approvalChoices)
+
+dateParser :: Parser String
+dateParser = do
+    year <- count 4 digit
+    char '-'
+    month <- count 2 digit
+    char '-'
+    day <- count 2 digit
+    return $ year ++ "-" ++ month ++ "-" ++ day
+
+voteForParser :: Parser Int
+voteForParser = do
+    lexeme $ string "Vote-for:"
+    voteFor <- lexeme $ many1 digit
+    return $ numberValue 10 voteFor
+
+writeInParser :: Parser Bool
+writeInParser = do
+    lexeme $ string "Write-in:"
+    writeIn <- lexeme $ choice [string "true", string "false"]
+    return $ writeIn == "true"
 
 optionParser :: Parser Option
 optionParser = do
-    string "Option: "
-    option <- manyTill anyChar newline
-    return option
+    lexeme $ string "Option:"
+    option <- lexeme quotedString
+    return $ Option option
+
+-- Helper parser for quoted strings
+quotedString :: Parser String
+quotedString = char '"' *> many (noneOf "\"") <* char '"'
+
+lexeme :: Parser a -> Parser a
+lexeme p = p <* spaces
 
 -- Function to parse a ballot
 parseBallot :: String -> Either ParseError Ballot
-parseBallot input = parse ballotParser "" input
+parseBallot = parse ballotParser ""
 
 ballotToJson :: Ballot -> String
 ballotToJson ballot = BL.unpack $ encode ballot

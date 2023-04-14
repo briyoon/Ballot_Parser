@@ -1,0 +1,141 @@
+{
+    "header": {
+        "date": "2023-11-08",
+        "instructions": "To cast your vote, select your choice and confirm your selection.",
+        "title": "General Election 2023"
+    },
+    "sections": [
+        {
+            "items": [
+                {
+                    "contest": {
+                        "contestChoices": [
+                            {
+                                "candidate": {
+                                    "name": "John Smith",
+                                    "party": "Democrat"
+                                }
+                            },
+                            {
+                                "candidate": {
+                                    "name": "Jane Doe",
+                                    "party": "Republican"
+                                }
+                            }
+                        ],
+                        "contestName": "President",
+                        "contestVoteFor": 1,
+                        "contestWriteIn": true
+                    }
+                },
+                {
+                    "proposition": {
+                        "propChoices": [
+                            {
+                                "option": "Yes"
+                            },
+                            {
+                                "option": "No"
+                            }
+                        ],
+                        "propDescription": "Prop 1 aims to increase funding for infrastructure projects, including roads, bridges, and public transportation.",
+                        "propName": "Prop 1 - Infrastructure Investment"
+                    }
+                },
+                {
+                    "rankedChoice": {
+                        "rankedChoiceName": "Best Flavor Mascot",
+                        "rankedChoiceVoteFor": 1,
+                        "rankedChoiceWriteIn": false,
+                        "rankedChoices": [
+                            {
+                                "candidate": {
+                                    "name": "Count Chocula",
+                                    "party": "Chocolate"
+                                }
+                            },
+                            {
+                                "candidate": {
+                                    "name": "Vanilla Ice",
+                                    "party": "Vanilla"
+                                }
+                            },
+                            {
+                                "candidate": {
+                                    "name": "Strawberry Shortcake",
+                                    "party": "Strawberry"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "approval": {
+                        "approvalChoices": [
+                            {
+                                "candidate": {
+                                    "name": "Alice Johnson",
+                                    "party": "Independent"
+                                }
+                            },
+                            {
+                                "candidate": {
+                                    "name": "Bob Martinez",
+                                    "party": "Independent"
+                                }
+                            },
+                            {
+                                "candidate": {
+                                    "name": "Charles Lee",
+                                    "party": "Independent"
+                                }
+                            }
+                        ],
+                        "approvalName": "Select preferred board members"
+                    }
+                }
+            ],
+            "sectionName": "National"
+        },
+        {
+            "items": [
+                {
+                    "contest": {
+                        "contestChoices": [
+                            {
+                                "candidate": {
+                                    "name": "Laura Brown",
+                                    "party": "Democrat"
+                                }
+                            },
+                            {
+                                "candidate": {
+                                    "name": "Steven Johnson",
+                                    "party": "Republican"
+                                }
+                            }
+                        ],
+                        "contestName": "Governor",
+                        "contestVoteFor": 1,
+                        "contestWriteIn": false
+                    }
+                },
+                {
+                    "proposition": {
+                        "propChoices": [
+                            {
+                                "option": "Yes"
+                            },
+                            {
+                                "option": "No"
+                            }
+                        ],
+                        "propDescription": "Prop 2 proposes an increase in educational funding for public schools, aiming to reduce class sizes and provide more resources for students.",
+                        "propName": "Prop 2 - Educational Funding"
+                    }
+                }
+            ],
+            "sectionName": "State"
+        }
+    ]
+}
